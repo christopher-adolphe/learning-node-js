@@ -2,6 +2,14 @@
 const express = require('express');
 // Loading the Joi Module for schema validation
 const Joi = require('joi');
+// Loading custom Logger middleware
+const logger =  require('./logger');
+// Loading custom Authentication middleware
+const authenticate = require('./authentication');
+// Loading the Helmet module
+const helmet = require('helmet');
+// Loading the Morgan module 3rd party middleware
+const morgan = require('morgan');
 
 /**
  * Creating an Express application from the Express module.
@@ -13,9 +21,54 @@ const Joi = require('joi');
 const app = express();
 
 /**
- * Adding JSON middleware to the Express application
+ * Adding JSON middleware to the Express application.
+ * 
+ * The express.json function is a built-in middleware function
+ * which parses incoming request with json payload and returns
+ * an object.
 */
 app.use(express.json());
+
+/**
+ * Adding Urlencoded middleware to the Express application.
+ * 
+ * The express.urlencoded function is a built-in middleware function
+ * which parses incoming request with urlencoded payload.
+*/
+app.use(express.urlencoded({extended: true}));
+
+/**
+ * Adding Static middlware to the Express application.
+ * 
+ * The express.static function is a built-in middleware function
+ * which the Express application serve static file to the client.
+ * @param {string} root - A string representing the directory to take as root for serving static files.
+*/
+app.use(express.static('public'));
+
+/**
+ * Adding Helmet 3rd party middleware to the Express application.
+ * 
+ * Helmet helps securing the Express application by setting various http headers.
+*/
+app.use(helmet());
+
+/**
+ * Adding Morgan 3rd party middleware to the Express application.
+ * 
+ * Morgan is an HTTP request logger for Node.js
+*/
+app.use(morgan('dev'));
+
+/**
+ * Creating a custom middleware function to log every request.
+*/
+app.use(logger);
+
+/**
+ * Creating a custom middleware function to authenticate every request.
+*/
+app.use(authenticate);
 
 // Defining the contraints of course schema
 const validateSchema = (course) => {
@@ -45,7 +98,6 @@ app.get('/', (request, response) => {
   response.send('Hello from Express!!');
 });
 
-
 /**
  * Defining a route handler for http GET request to get a list of courses.
  */
@@ -70,7 +122,6 @@ app.get('/api/courses/:id', (request, response) => {
 
   response.send(selectedCourse);
 });
-
 
 /**
  * Defining a route handler for http POST request to add new course.
