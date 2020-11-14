@@ -10,6 +10,15 @@ const authenticate = require('./authentication');
 const helmet = require('helmet');
 // Loading the Morgan module 3rd party middleware
 const morgan = require('morgan');
+// Loading the Config module
+const config = require('config');
+/**
+ * Loading the Debug module
+ * 
+ * Creating various debugging namespace to use throughout the Express application
+*/
+const startupDebugger = require('debug')('app:startup');
+const databaseDebugger = require('debug')('app:database');
 
 /**
  * Creating an Express application from the Express module.
@@ -63,7 +72,7 @@ app.use(helmet());
  * 1) process.env.NODE_ENV
  * 2) app env: ${app.get('env')
  * 
- * To set environment properties use:
+ * To set environment variables use:
  * export NODE_ENV=production
 */
 console.log(`NODE_ENV: ${process.env.NODE_ENV}`);
@@ -71,6 +80,19 @@ console.log(`app env: ${app.get('env')}`);
 
 if (app.get('env') === 'development') {
   app.use(morgan('dev'));
+  startupDebugger('Morgan enabled');
+}
+
+// Using the databaseDebugger
+databaseDebugger('Connected to database');
+
+/**
+ * Using Config to get configuration details from different environments
+*/
+console.log(`Application name: ${config.get('name')}`);
+if (config.has('mail')) {
+  console.log(`Mail server host: ${config.get('mail.host')}`);
+  console.log(`Mail server password: ${config.get('mail.password')}`);
 }
 
 /**
