@@ -1,9 +1,13 @@
 // Loading the Express module
 const express = require('express');
+// Loading the Root module
+const rootRouter = require('./routes/root');
+// Loading the Courses module
+const coursesRouter = require('./routes/courses');
 // Loading the Joi Module for schema validation
 const Joi = require('joi');
 // Loading custom Logger middleware
-const logger =  require('./logger');
+const logger =  require('./middleware/logger');
 // Loading custom Authentication middleware
 const authenticate = require('./authentication');
 // Loading the Helmet module
@@ -28,6 +32,21 @@ const databaseDebugger = require('debug')('app:database');
  * use to handle http requests to endpoints of our application.
  */
 const app = express();
+
+/**
+ * Defining the router to use for root endpoint
+ */
+app.use('/', rootRouter);
+
+/**
+ * Defining the router to use for courses endpoint
+ */
+app.use('/api/courses', coursesRouter);
+
+/**
+ * Setting a Pug as view engine for dynamic templating
+ */
+app.set('view engine', 'pug');
 
 /**
  * Adding JSON middleware to the Express application.
@@ -92,7 +111,7 @@ databaseDebugger('Connected to database');
 console.log(`Application name: ${config.get('name')}`);
 if (config.has('mail')) {
   console.log(`Mail server host: ${config.get('mail.host')}`);
-  console.log(`Mail server password: ${config.get('mail.password')}`);
+  // console.log(`Mail server password: ${config.get('mail.password')}`);
 }
 
 /**
@@ -114,107 +133,6 @@ const validateSchema = (course) => {
 
   return courseSchema.validate(course);
 };
-
-// Creating a list of courses
-const courses = [
-  {id: 1, title: 'Node.js - The Complete Guide', price: 12.99},
-  {id: 2, title: 'Angular - The Complete Guide', price: 15.99},
-  {id: 3, title: 'Vuejs - The Complete Guide', price: 13.99}
-];
-
-/**
- * Defining a route and it's handler.
- * 
- * Implementing a route handler for http GET requests for the root route.
- * @param {string} name - A string representing the url path (a.k.a The route)
- * @param {function} callback - A callback function which will handle the http GET request for the specified url (a.k.a The route handler)
-*/
-app.get('/', (request, response) => {
-  response.send('Hello from Express!!');
-});
-
-/**
- * Defining a route handler for http GET request to get a list of courses.
- */
-app.get('/api/courses', (request, response) => {
-  response.send(courses);
-});
-
-/**
- * Defining a route with parameter
- * 
- * Passing the #id of a specific course as part of the url <:paramName> and obtainig it from the #request parameter of
- * the callback function as request.params.<paramName>
- * Query strings can alse be part of the url ?<queryName> and obtaining it from the #request parameter of the callback
- * function as request.query.<queryName>
-*/
-app.get('/api/courses/:id', (request, response) => {
-  const selectedCourse = courses.find(course => course.id === +request.params.id);
-
-  if (!selectedCourse) {
-    return response.status(404).send(`No course found for id ${request.params.id}.`);
-  }
-
-  response.send(selectedCourse);
-});
-
-/**
- * Defining a route handler for http POST request to add new course.
- */
-app.post('/api/courses', (request, response) => {
-  const { error } = validateSchema(request.body);
-
-  if (error) {
-    return response.status(400).send(`Error: ${error.message}`);
-  }
-
-  const newCourse = {...request.body, id: courses.length + 1};
-
-  courses.push(newCourse);
-
-  response.status(201).send(newCourse);
-});
-
-/**
- * Defining a route handler for http PUT request to update a course
-*/
-app.put('/api/courses/:id', (request, response) => {
-  const courseToBeUpdated = courses.find(course => course.id === +request.params.id);
-  const { error } = validateSchema(request.body);
-
-  // Handling invalid course id
-  if (!courseToBeUpdated) {
-    return response.status(404).send(`Could not find course with id ${request.params.id} to update.`);
-  }
-
-  // Handling invalid request body
-  if (error) {
-    return response.status(400).send(`Error: ${error.message}`);
-  }
-
-  // Updating the course corresponding to the #id passed as parameter
-  const index = courses.findIndex(course => course.id === +request.params.id);
-  courses[index] = {...request.body, id: +request.params.id};
-
-  response.send({...request.body, id: +request.params.id});
-});
-
-/**
- * Defining a route handler for http DELETE request to delete a course
-*/
-app.delete('/api/courses/:id', (request, response) => {
-  const index = courses.findIndex(course => course.id === +request.params.id);
-
-  // Handling invalid course id
-  if (index === -1) {
-    return response.status(404).send(`Could not find course with id ${request.params.id} to delete.`);
-  }
-
-  // Deleting the course corresponding to the #id passsed as parameter
-  courses.splice(index, 1);
-
-  response.send(`Course with id ${request.params.id} was successfully deleted.`);
-});
 
 /***
  * Creating a listener for a network port.
