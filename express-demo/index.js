@@ -56,9 +56,22 @@ app.use(helmet());
 /**
  * Adding Morgan 3rd party middleware to the Express application.
  * 
- * Morgan is an HTTP request logger for Node.js
+ * Morgan is an HTTP request logger for Node.js. Also adding an environment
+ * check to use Morgan in development environment only.
+ * 
+ * Two ways of obtaining environment based information are:
+ * 1) process.env.NODE_ENV
+ * 2) app env: ${app.get('env')
+ * 
+ * To set environment properties use:
+ * export NODE_ENV=production
 */
-app.use(morgan('dev'));
+console.log(`NODE_ENV: ${process.env.NODE_ENV}`);
+console.log(`app env: ${app.get('env')}`);
+
+if (app.get('env') === 'development') {
+  app.use(morgan('dev'));
+}
 
 /**
  * Creating a custom middleware function to log every request.
