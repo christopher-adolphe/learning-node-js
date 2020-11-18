@@ -112,3 +112,39 @@ const getCourses = async () => {
 };
 
 getCourses();
+
+const updateCourse = async (id) => {
+  /**
+   * Query first approach.
+   * 
+   * 1) Use findById()
+   * 2) Modify the properties of the document
+   * 3) save()
+  */
+  const course = await Course.findById(id);
+
+  if (!course) {
+      return;
+  }
+
+  course.set({
+    isPublished: true,
+    author: 'John Doe'
+  });
+
+  try {
+    const result = await course.save();
+    console.log(result);
+  } catch(error) {
+    console.error('Sorry could not create course', error);
+  }
+
+  /**
+   * Update first approach.
+   * 
+   * 1) Update directly
+   * 2) Optionally get the updated document
+  */
+};
+
+updateCourse('5fb418bd2136bb03b31723b4');
