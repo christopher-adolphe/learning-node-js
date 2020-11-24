@@ -124,27 +124,58 @@ const updateCourse = async (id) => {
   const course = await Course.findById(id);
 
   if (!course) {
-      return;
+    return;
   }
 
   course.set({
     isPublished: true,
-    author: 'John Doe'
+    author: 'Christopher Adolphe'
   });
 
   try {
     const result = await course.save();
     console.log(result);
   } catch(error) {
-    console.error('Sorry could not create course', error);
+    console.error('Sorry could not update course', error);
   }
+};
 
+// updateCourse('5fb418bd2136bb03b31723b4');
+
+const updateCourseV2 = async (id) => {
   /**
    * Update first approach.
    * 
-   * 1) Update directly
-   * 2) Optionally get the updated document
+   * 1) Use update()
   */
+  const result = await Course.update({_id: id}, {
+    $set: {
+      author: 'John Doe',
+      isPublished: false
+    }
+  });
+
+  console.log(result);
 };
 
-updateCourse('5fb418bd2136bb03b31723b4');
+// updateCourseV2('5fb418bd2136bb03b31723b4');
+
+const updateCourseV3 = async (id) => {
+  /**
+   * Update first approach and get updated
+   * 
+   * 1) Use findByIdAndUpdate()
+   * 2) Note that findByIdAndUpdate() returns the original document
+   * 3) To get the updated document, we pass a 3rd parameter to findByIdAndUpdate()
+  */
+  const course = await Course.findByIdAndUpdate(id, {
+    $set: {
+      author: 'Aurore Virassamy',
+      isPublished: true
+    }
+  }, {new: true});
+
+  console.log(course);
+};
+
+updateCourseV3('5fb418bd2136bb03b31723b4');
