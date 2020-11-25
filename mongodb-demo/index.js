@@ -146,7 +146,8 @@ const updateCourseV2 = async (id) => {
   /**
    * Update first approach.
    * 
-   * 1) Use update()
+   * 1) Use update() which takes a filter query object as it's first parameter
+   * and a mongoDB update operator as second parameter
   */
   const result = await Course.update({_id: id}, {
     $set: {
@@ -178,4 +179,34 @@ const updateCourseV3 = async (id) => {
   console.log(course);
 };
 
-updateCourseV3('5fb418bd2136bb03b31723b4');
+// updateCourseV3('5fb418bd2136bb03b31723b4');
+
+const deleteCourse = async (id) => {
+  try {
+    /**
+     * The deleteOne() take a filter query object and deletes the first document
+     * which matches the filter.
+     */
+    const result = await Course.deleteOne({_id: id});
+    console.log(result);
+  } catch (error) {
+    console.error('Sorry, could not delete course: ', error);
+  }
+};
+
+// deleteCourse('5fb418bd2136bb03b31723b4');
+
+const findAndDeleteCourse = async (id) => {
+  try {
+    /**
+     * If we want to get the document to be deleted, use findByIdAndRemove() which
+     * takes the id of the document to be deleted.
+     */
+    const course = await Course.findByIdAndRemove({_id: id});
+    console.log(course);
+  } catch (error) {
+    console.error('Sorry, could not delete course: ', error);
+  }
+};
+
+findAndDeleteCourse('5fb418bd2136bb03b31723b4');
