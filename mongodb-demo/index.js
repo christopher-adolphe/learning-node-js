@@ -16,13 +16,48 @@ mongoose.connect('mongodb://127.0.0.1:27017/playground-db', {useNewUrlParser: tr
   .then(() => console.log('Connected to MongoDB...'))
   .catch(error => console.error('Could not connect to MongoDB...', error));
 
-// Defining a schema
+/**
+ * Defining a schema and adding validation.
+ * 
+ * This validation is provided by Mongoose. MongoDB is not aware of any kind of validation.
+*/
 const courseSchema = new mongoose.Schema({
-  name: String,
+  name: {
+    type: String,
+    required: true,
+    minlength: 5,
+    maxlength: 225,
+    // match: /pattern/ For validation using regular expressions
+  },
   author: String,
-  tags: [String],
+  tags: {
+    type: Array,
+    /**
+     * Creating a custom validator.
+     * 
+     * The validator property takes a function which takes the value as a parameter against
+     * which we perform the validation logic.
+     * The message property is used to send a custom message relevant to the custom
+     * validation we have created.
+    */
+    validate: {
+      validator: function(value) {
+        return value && value.length > 0;
+      },
+      message: 'A course should have a least one tag.'
+    }
+  },
+  category: {
+    type: String,
+    enum: ['web', 'mobile', 'network'],
+    required: true
+  },
   date: {type: Date, default: Date.now},
-  isPublished: Boolean
+  isPublished: Boolean,
+  price: {
+    type: Number,
+    required: function() { return this.isPublished } // Should not use arrow function here because it will not have the context of 'this' with respect to the schema object
+  }
 });
 
 // Compiling the schema into a model to obtain a Course class
@@ -31,22 +66,27 @@ const Course = mongoose.model('Course', courseSchema);
 const createCourse = async () => {
   // Instantiating a course object from the Course class
   const course = new Course({
-    name: 'Vue.js - The Complete Guide',
-    author: 'Maximilian Schwarzmuller',
-    tags: ['javascript', 'front-end'],
-    isPublished: true
+    name: 'Spring Boot Microservices - The Complete Guide',
+    author: 'Baeldug',
+    tags: null,
+    category: 'web',
+    isPublished: true,
+    price: 20
   });
 
   // Saving the document to the collection
   try {
+    // Triggering validation manually
+    // await course.validate();
+
     const result = await course.save();
     console.log(result);
   } catch(error) {
-    console.error('Sorry could not create course', error);
+    console.error('Sorry could not create course. ', error.message);
   }
 };
 
-// createCourse();
+createCourse();
 
 const getCourses = async () => {
   /**
@@ -106,12 +146,12 @@ const getCourses = async () => {
       .sort({name: -1})
       .select({name: 1, tags: 1})
     console.log(courses);
-  } catch(error) {
-    console.error('Sorry could not fetch courses', error);
+  } catch (error) {
+    console.error('Sorry could not fetch courses. ', error.message);
   }
 };
 
-getCourses();
+// getCourses();
 
 const updateCourse = async (id) => {
   /**
@@ -135,8 +175,8 @@ const updateCourse = async (id) => {
   try {
     const result = await course.save();
     console.log(result);
-  } catch(error) {
-    console.error('Sorry could not update course', error);
+  } catch (error) {
+    console.error('Sorry could not update course. ', error.message);
   }
 };
 
@@ -190,7 +230,7 @@ const deleteCourse = async (id) => {
     const result = await Course.deleteOne({_id: id});
     console.log(result);
   } catch (error) {
-    console.error('Sorry, could not delete course: ', error);
+    console.error('Sorry, could not delete course. ', error.message);
   }
 };
 
@@ -205,8 +245,8 @@ const findAndDeleteCourse = async (id) => {
     const course = await Course.findByIdAndRemove({_id: id});
     console.log(course);
   } catch (error) {
-    console.error('Sorry, could not delete course: ', error);
+    console.error('Sorry, could not delete course. ', error.message);
   }
 };
 
-findAndDeleteCourse('5fb418bd2136bb03b31723b4');
+// findAndDeleteCourse('5fb418bd2136bb03b31723b4');

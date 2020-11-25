@@ -21,7 +21,7 @@ const getBackendCourses = async () => {
       .find({isPublished: true, tags: 'backend'})
       .sort({name: 1}) // alternative .sort('name') for ascending and .sort('-name') for descending
       .select({name: 1, author: 1}) // alternative .select('name author)
-  } catch(error) {
+  } catch (error) {
     console.log('Could not get courses ', error.message);
   }
 };
@@ -33,7 +33,7 @@ const getFrontendBackendCourses = async () => {
       // alternatively .or([{tags: 'frontend'}, {tags: 'backend'}])
       .sort('-price')
       .select('name author price')
-  } catch(error) {
+  } catch (error) {
     console.log('Could not get courses ', error.message);
   }
 };
@@ -44,7 +44,7 @@ const getExpensiveCourses = async () => {
       .find({isPublished: true})
       .or([{price: {$gte: 15}}, {name: /.*by.*/i}])
       .select('name author price')
-  } catch(error) {
+  } catch (error) {
     console.log('Could not get courses ', error.message);
   }
 };
