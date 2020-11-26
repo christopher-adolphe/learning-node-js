@@ -41,8 +41,14 @@ const courseSchema = new mongoose.Schema({
      * validation we have created.
     */
     validate: {
-      validator: function(value) {
-        return value && value.length > 0;
+      isAsync: true,
+      validator: function(value, callback) {
+        // return value && value.length > 0;
+        // Simulating an asynchronous validation
+        setTimeout(() => {
+          const result = value && value.length > 0;
+          callback(result);
+        }, 3000);
       },
       message: 'A course should have a least one tag.'
     }
@@ -50,13 +56,18 @@ const courseSchema = new mongoose.Schema({
   category: {
     type: String,
     enum: ['web', 'mobile', 'network'],
-    required: true
+    required: true,
+    lowercase: true,
+    // uppercase: true,
+    trim: true
   },
   date: {type: Date, default: Date.now},
   isPublished: Boolean,
   price: {
     type: Number,
-    required: function() { return this.isPublished } // Should not use arrow function here because it will not have the context of 'this' with respect to the schema object
+    required: function() { return this.isPublished }, // Should not use arrow function here because it will not have the context of 'this' with respect to the schema object
+    get: value => Math.round(value), // The getter is called when reading values of the price property
+    set: value => Math.round(value) // The setter is called when setting values of the price property
   }
 });
 
@@ -69,7 +80,7 @@ const createCourse = async () => {
     name: 'Spring Boot Microservices - The Complete Guide',
     author: 'Baeldug',
     tags: null,
-    category: 'web',
+    category: '-',
     isPublished: true,
     price: 20
   });
@@ -82,7 +93,9 @@ const createCourse = async () => {
     const result = await course.save();
     console.log(result);
   } catch(error) {
-    console.error('Sorry could not create course. ', error.message);
+    for (const field in error.errors) {
+      console.error('Sorry could not create course. ', error.errors[field].message);
+    }
   }
 };
 
