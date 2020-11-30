@@ -1,96 +1,94 @@
-const Joi = require('joi');
 const express = require('express');
+const { Genre, validate } = require('../models/genre');
 const router = express.Router();
 
-// Defining a list of movie genres
-const genreList = [
-  {id: 1, name: 'Action & Adventure'},
-  {id: 2, name: 'Anime'},
-  {id: 3, name: 'Classic'},
-  {id: 4, name: 'Comedy'},
-  {id: 5, name: 'Drama'},
-  {id: 6, name: 'Documentary'},
-  {id: 7, name: 'Horror'},
-  {id: 8, name: 'Romantic'},
-  {id: 9, name: 'Sci-fi & Fantasy'},
-  {id: 10, name: 'Sports'},
-  {id: 11, name: 'Teen'},
-  {id: 12, name: 'Thriller'},
-  {id: 13, name: 'Sci-fi & Fantasy'}
-];
-
-// Defining a validator function for genre schema
-const genreValidator = (genre) => {
-  // Defining the schema constraints using Joi
-  const genreSchema = Joi.object({
-    name: Joi.string().required()
-  });
-
-  return genreSchema.validate(genre);
-};
-
 // Defining a route to handle http GET request to get all genres
-router.get('/', (request, response) => {
-  response.send(genreList);
+router.get('/', async (request, response) => {
+  try {
+    const genreList = await Genre.find()
+      .sort('name')
+      .select('_id name');
+
+    response.send(genreList);
+  } catch (exception) {
+    response.status(500).send(`Sorry, an error occured while fetching genres: ${exception.message}`);
+  }
 });
 
 // Defining a route to handle http GET request to get a specific genre
-router.get('/:id', (request, response) => {
-  const selectedGenre = genreList.find(genre => genre.id === +request.params.id);
+router.get('/:id', async (request, response) => {
+  try {
+    const selectedGenre = await Genre.findById(request.params.id);
 
-  if (!selectedGenre) {
-    return response.status(404).send(`Sorry, we could not find genre with id ${request.params.id}.`);
+    if (!selectedGenre) {
+      return response.status(404).send(`Sorry, we could not find genre with id ${request.params.id}.`);
+    }
+
+    response.send(selectedGenre);
+  } catch (exception) {
+    response.status(500).send(`Sorry, an error occured while fetching genre with id ${request.params.id}: ${exception.message}`);
   }
-
-  response.send(selectedGenre);
 });
 
 // Defining a route to handle http POST request to add new genre
-router.post('/', (request, response) => {
-  const {error} = genreValidator(request.body);
+router.post('/', async (request, response) => {
+  const {error} = validate(request.body);
 
   if (error) {
     return response.status(400).send(`Sorry, we could not add new genre because ${error.message}.`);
   }
 
-  const newGenre = {...request.body, id: genreList.length + 1};
+  try {
+    let newGenre = new Genre({ name: request.body.name });
 
-  genreList.push(newGenre);
-
-  response.status(201).send(newGenre);
+    newGenre = await newGenre.save();
+    
+    response.status(201).send(newGenre);
+  } catch (exception) {
+    response.status(500).send(`Sorry, an error occured while creating new genre: ${exception.message}`);
+  }
 });
 
 // Defining a route to handle http PUT request to update a genre
-router.put('/:id', (request, response) => {
-  const index = genreList.findIndex(genre => genre.id === +request.params.id);
-  const {error} = genreValidator(request.body);
-
-  if (index === -1) {
-    return response.status(404).send(`Sorry, we could not find genre with id ${request.params.id} to perform update.`);
-  }
+router.put('/:id', async (request, response) => {
+  const { error } = validate(request.body);
 
   if (error) {
     return response.sendStatus(400).send(`Sorry, we could not update genre with id ${request.params.id} because ${error.message}.`);
   }
+  
+  try {
+    const genre = await Genre.findByIdAndUpdate(request.params.id, { name: request.body.name }, { new: true });
+    
+    if (!genre) {
+      return response.status(404).send(`Sorry, we could not find genre with id ${request.params.id} to perform update.`);
+    }
 
-  genreList[index] = {...request.body, id: +request.params.id};
+    genre.set({
+      name: request.body.name
+    });
 
-  response.send({...request.body, id: +request.params.id})
+    const result = await genre.save();
+
+    response.send(result);
+  } catch (exception) {
+    response.status(500).send(`Sorry, an error occured while updating genre with id ${request.params.id}: ${exception.message}`);
+  }
 });
 
 // Defining a route to handle http DELETE request to delete a genre
-router.delete('/:id', (request, response) => {
-  const index = genreList.findIndex(genre => genre.id === +request.params.id);
+router.delete('/:id', async (request, response) => {
+  try {
+    const deletedGenre = await Genre.findByIdAndRemove(request.params.id);
 
-  if (index === -1) {
-    return response.status(404).send(`Sorry, we could not find genre with id ${request.params.id} to perform delete.`);
+    if (!deletedGenre) {
+      return response.status(404).send(`Sorry, we could not find genre with id ${request.params.id} to perform delete.`);
+    }
+
+    response.send(deletedGenre);
+  } catch (exception) {
+    response.status(500).send(`Sorry, an error occured while deleting genre with id ${request.params.id}: ${exception.message}`);
   }
-
-  const deletedGenre = genreList[index];
-
-  genreList.splice(index, 1);
-
-  response.send(deletedGenre);
 });
 
 module.exports = router;
