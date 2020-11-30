@@ -1,5 +1,5 @@
-const express = require('express');
 const { Genre, validate } = require('../models/genre');
+const express = require('express');
 const router = express.Router();
 
 // Defining a route to handle http GET request to get all genres
