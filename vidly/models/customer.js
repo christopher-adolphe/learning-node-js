@@ -26,8 +26,9 @@ const Customer = mongoose.model('Customer', customerSchema);
 
 const customerValidator = (customer) => {
   const validateCustomer = Joi.object({
-    name: Joi.string().minlength(2).maxlength(250).required(),
-    phone: Joi.string().minlength(8).maxlength(8).required()
+    name: Joi.string().min(2).max(250).required(),
+    phone: Joi.string().min(8).max(8).required(),
+    isGold: Joi.boolean()
   });
 
   return validateCustomer.validate(customer);

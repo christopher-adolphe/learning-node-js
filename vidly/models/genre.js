@@ -5,7 +5,7 @@ const Joi =  require('joi');
 const genreSchema = new mongoose.Schema({
   name: {
     type: String,
-    minlength: 4,
+    minlength: 2,
     maxlength: 50,
     required: true
   }
@@ -18,7 +18,7 @@ const Genre = mongoose.model('Genre', genreSchema);
 const genreValidator = (genre) => {
   // Defining the schema constraints using Joi
   const validateGenre = Joi.object({
-    name: Joi.string().required()
+    name: Joi.string().min(2).max(50).required()
   });
 
   return validateGenre.validate(genre);

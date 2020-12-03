@@ -30,18 +30,18 @@ router.get('/:id', async (request, response) => {
   }
 });
 
-// Defining a route to handle http POST request to add new genre
+// Defining a route to handle http POST request to add a new genre
 router.post('/', async (request, response) => {
-  const {error} = validate(request.body);
+  const { error } = validate(request.body);
 
   if (error) {
     return response.status(400).send(`Sorry, we could not add new genre because ${error.message}.`);
   }
 
   try {
-    let newGenre = new Genre({ name: request.body.name });
+    const newGenre = new Genre({ name: request.body.name });
 
-    newGenre = await newGenre.save();
+    await newGenre.save();
     
     response.status(201).send(newGenre);
   } catch (exception) {
