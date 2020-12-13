@@ -6,6 +6,8 @@ const mongoose = require('mongoose');
 const genresRouter = require('./routes/genres');
 // Loading the Customers module
 const customersRouter = require('./routes/customers');
+// Loading the Movies module
+const moviesRouter = require('./routes/movies');
 
 // Creating an Express application
 const app = express();
@@ -24,6 +26,7 @@ app.use(express.json());
 // Defining routes
 app.use('/api/genres', genresRouter);
 app.use('/api/customers', customersRouter);
+app.use('/api/movies', moviesRouter);
 
 app.listen(port, () => {
   console.log(`Server is up and running on ${port}... Click here http://localhost:${port}`);

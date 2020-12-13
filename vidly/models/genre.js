@@ -24,5 +24,6 @@ const genreValidator = (genre) => {
   return validateGenre.validate(genre);
 };
 
+module.exports.genreSchema = genreSchema;
 module.exports.Genre = Genre;
 module.exports.validate = genreValidator;

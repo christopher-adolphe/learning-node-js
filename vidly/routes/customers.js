@@ -1,6 +1,6 @@
-const { Customer, validate } = require('../models/customer');
 const express = require('express');
 const router = express.Router();
+const { Customer, validate } = require('../models/customer');
 
 // Defining a route to handle http GET request to get all customers
 router.get('/', async (request, response) => {
