@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { Movie, validate } = require('../models/movie');
+const { Genre } = require('../models/genre');
 
 // Defining a route to handle http GET request to get all movies
 router.get('/', async (resquest, response) => {
@@ -38,9 +39,15 @@ router.post('/', async (request, response) => {
   }
 
   try {
-    const newMovie = new Movie({ ...request.body });
+    const genre = await Genre.findById(request.body.genreId);
 
-    await newMovie.save();
+    if (!genre) {
+      return response.status(400).send(`Sorry, we could not find genre with id ${request.body.genreId}`);
+    }
+
+    let newMovie = new Movie({ ...request.body, genre: { _id: genre._id, name: genre.name } });
+
+    newMovie = await newMovie.save();
 
     response.status(201).send(newMovie);
   } catch (exception) {
