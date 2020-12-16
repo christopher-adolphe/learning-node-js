@@ -21,7 +21,7 @@ router.get('/:id', async (request, response) => {
     const selectedMovie = await Movie.findById(request.params.id);
 
     if (!selectedMovie) {
-      return response.status(404).send(`Sorry, we could not find movie with id ${request.params.id}.`)
+      return response.status(404).send(`Sorry, we could not find movie with id ${request.params.id}.`);
     }
 
     response.send(selectedMovie);
@@ -42,7 +42,7 @@ router.post('/', async (request, response) => {
     const genre = await Genre.findById(request.body.genreId);
 
     if (!genre) {
-      return response.status(400).send(`Sorry, we could not find genre with id ${request.body.genreId}`);
+      return response.status(400).send(`Sorry, we could not find genre with id ${request.body.genreId}.`);
     }
 
     let newMovie = new Movie({ ...request.body, genre: { _id: genre._id, name: genre.name } });
@@ -51,7 +51,53 @@ router.post('/', async (request, response) => {
 
     response.status(201).send(newMovie);
   } catch (exception) {
-    response.status(500).send(`Sorry, an error occured while creating new movie: ${exception.message}`)
+    response.status(500).send(`Sorry, an error occured while creating new movie: ${exception.message}`);
+  }
+});
+
+// Defining a route to handle http PUT request to update a movie
+router.put('/:id', async (request, response) => {
+  const { error } = validate(request.body);
+
+  if (error) {
+    return response.status(400).send(`Sorry, we could not update movie with id ${request.params.id} because ${error.message}.`);
+  }
+
+  try {
+    const genre = await Genre.findById(request.body.genreId);
+
+    if (!genre) {
+      return response.status(400).send(`Sorry, we could not find genre with id ${request.body.genreId} to perform update on movie.`);
+    }
+
+    const movie = await Movie.findByIdAndUpdate(request.params.id, { ...request.body, genre: { _id: genre._id, name: genre.name }}, { new: true });
+
+    if (!movie) {
+      return response.status(404).send(`Sorry, we could not find movie with id ${request.params.id} to perform update.`);
+    }
+
+    movie.set({ ...request.body, genre: { _id: genre._id, name: genre.name }});
+
+    const result = await movie.save();
+
+    response.send(result);
+  } catch (exception) {
+    response.status(500).send(`Sorry, an error occured while updating movie with id ${request.params.id}: ${exception.message}`);
+  }
+});
+
+// Defining a route to handle http DELETE request to delete a movie
+router.delete('/:id', async (request, response) => {
+  try {
+    const deletedMovie = await Movie.findByIdAndDelete(request.params.id);
+
+    if (!deletedMovie) {
+      return response.status(404).send(`Sorry, we could not find movie with id ${request.params.id} to perform delete.`);
+    }
+
+    response.send(deletedMovie);
+  } catch (exception) {
+    response.status(500).send(`Sorry, an error occured while deleting movie with id ${request.params.id}: ${exception.message}`);
   }
 });
 
