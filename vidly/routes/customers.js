@@ -66,11 +66,7 @@ router.put('/:id', async (request, response) => {
       return response.status(404).send(`Sorry, we could not find customer with id ${request.params.id} to perform update.`);
     }
 
-    customer.set({ ...request.body });
-
-    const result = await customer.save();
-
-    response.send(result);
+    response.send(customer);
   } catch (exception) {
     response.status(500).send(`Sorry, an error occured while updating customer with id ${request.params.id}: ${exception.message}`);
   }

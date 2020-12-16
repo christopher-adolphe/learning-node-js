@@ -64,13 +64,7 @@ router.put('/:id', async (request, response) => {
       return response.status(404).send(`Sorry, we could not find genre with id ${request.params.id} to perform update.`);
     }
 
-    genre.set({
-      name: request.body.name
-    });
-
-    const result = await genre.save();
-
-    response.send(result);
+    response.send(genre);
   } catch (exception) {
     response.status(500).send(`Sorry, an error occured while updating genre with id ${request.params.id}: ${exception.message}`);
   }

@@ -76,11 +76,7 @@ router.put('/:id', async (request, response) => {
       return response.status(404).send(`Sorry, we could not find movie with id ${request.params.id} to perform update.`);
     }
 
-    movie.set({ ...request.body, genre: { _id: genre._id, name: genre.name }});
-
-    const result = await movie.save();
-
-    response.send(result);
+    response.send(movie);
   } catch (exception) {
     response.status(500).send(`Sorry, an error occured while updating movie with id ${request.params.id}: ${exception.message}`);
   }

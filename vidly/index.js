@@ -13,9 +13,16 @@ const moviesRouter = require('./routes/movies');
 const app = express();
 
 // Connecting to MongoDB using Mongoose
-mongoose.connect('mongodb://127.0.0.1:27017/vidly', {useNewUrlParser: true, useUnifiedTopology: true, useFindAndModify: false})
-  .then(() => console.log('Connected to MongoDB'))
-  .catch((exception) => console.error(`Sorry, could not connect to MongoDB: ${exception}`));
+const initConnection = async () => {
+  try {
+    await mongoose.connect('mongodb://127.0.0.1:27017/vidly', { useNewUrlParser: true, useUnifiedTopology: true, useFindAndModify: false });
+    console.log('Connected to MongoDB');
+  } catch (exception) {
+    console.error(`Sorry, could not connect to MongoDB: ${exception}`);
+  }
+};
+
+initConnection();
 
 // Defining a port number for the Express application
 const port = process.env.PORT || 3000;
