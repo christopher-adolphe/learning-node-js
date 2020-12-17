@@ -35,7 +35,7 @@ router.post('/', async (request, response) => {
   const { error } = validate(request.body);
 
   if (error) {
-    return response.status(400).send(`Sorry, we could not add new genre because ${error.message}.`);
+    return response.status(400).send(`Sorry, we could not create new genre because ${error.message}.`);
   }
 
   try {

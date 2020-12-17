@@ -37,7 +37,7 @@ router.post('/', async (request, response) => {
   const { error } = validate(request.body);
 
   if (error) {
-    return response.status(400).send(`Sorry, we could not add new customer because ${error.message}.`);
+    return response.status(400).send(`Sorry, we could not create new customer because ${error.message}.`);
   }
 
   try {
