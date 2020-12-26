@@ -45,9 +45,9 @@ router.post('/', async (request, response) => {
       return response.status(400).send(`Sorry, we could not find genre with id ${request.body.genreId}.`);
     }
 
-    let newMovie = new Movie({ ...request.body, genre: { _id: genre._id, name: genre.name } });
+    const newMovie = new Movie({ ...request.body, genre: { _id: genre._id, name: genre.name } });
 
-    newMovie = await newMovie.save();
+    await newMovie.save();
 
     response.status(201).send(newMovie);
   } catch (exception) {

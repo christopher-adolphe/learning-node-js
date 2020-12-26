@@ -2,6 +2,9 @@
 const express = require('express');
 // Loading Mongoose module
 const mongoose = require('mongoose');
+// Loading Joi module
+const Joi = require('joi');
+Joi.objectId = require('joi-objectid')(Joi);
 // Loading the Genres module
 const genresRouter = require('./routes/genres');
 // Loading the Customers module
