@@ -13,6 +13,8 @@ const customersRouter = require('./routes/customers');
 const moviesRouter = require('./routes/movies');
 // Loading the Rentals module
 const rentalsRouter = require('./routes/rentals');
+// Loading the Users module
+const usersRouter = require('./routes/users');
 
 // Creating an Express application
 const app = express();
@@ -40,6 +42,7 @@ app.use('/api/genres', genresRouter);
 app.use('/api/customers', customersRouter);
 app.use('/api/movies', moviesRouter);
 app.use('/api/rentals', rentalsRouter);
+app.use('/api/users', usersRouter);
 
 app.listen(port, () => {
   console.log(`Server is up and running on ${port}... Click here http://localhost:${port}`);
