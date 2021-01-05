@@ -1,4 +1,6 @@
 const express =  require('express');
+const _ = require('lodash');
+const bcrypt = require('bcrypt');
 const router = express.Router();
 const { User, validate } = require('../models/user');
 
@@ -18,9 +20,13 @@ router.post('/', async (request, response) => {
     
     user = new User({ ...request.body });
 
+    const salt = await bcrypt.genSalt(10);
+    user.password = await bcrypt.hash(user.password, salt)
+
     await user.save();
 
-    response.status(201).send(user);
+    // Using lodash pick() method to select only keys of an object
+    response.status(201).send(_.pick(user, ['name', 'email']));
   } catch (exception) {
     response.status(500).send(`Sorry, an error occured while registering new genre: ${exception.message}`)
   }
