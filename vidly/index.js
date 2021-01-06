@@ -1,3 +1,5 @@
+// Loading Config module
+const config = require('config');
 // Loading Express module
 const express = require('express');
 // Loading Mongoose module
@@ -15,14 +17,28 @@ const moviesRouter = require('./routes/movies');
 const rentalsRouter = require('./routes/rentals');
 // Loading the Users module
 const usersRouter = require('./routes/users');
+// Loading the Authentication module
+const AuthenticationRouter = require('./routes/authentication');
 
 // Creating an Express application
 const app = express();
 
+// Checking if JWT private key is defined and exiting the process
+if (!config.get('jwtPrivateKey')) {
+  console.error('Fatal error: jwtPrivateKey is not defined');
+
+  process.exit(1);
+}
+
 // Connecting to MongoDB using Mongoose
 const initConnection = async () => {
   try {
-    await mongoose.connect('mongodb://127.0.0.1:27017/vidly', { useNewUrlParser: true, useUnifiedTopology: true, useFindAndModify: false });
+    await mongoose.connect('mongodb://127.0.0.1:27017/vidly', { 
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+      useFindAndModify: false,
+      useCreateIndex: true
+    });
     console.log('Connected to MongoDB');
   } catch (exception) {
     console.error(`Sorry, could not connect to MongoDB: ${exception}`);
@@ -43,6 +59,7 @@ app.use('/api/customers', customersRouter);
 app.use('/api/movies', moviesRouter);
 app.use('/api/rentals', rentalsRouter);
 app.use('/api/users', usersRouter);
+app.use('/api/auth', AuthenticationRouter);
 
 app.listen(port, () => {
   console.log(`Server is up and running on ${port}... Click here http://localhost:${port}`);

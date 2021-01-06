@@ -1,6 +1,8 @@
-const express =  require('express');
+const config = require('config');
+const express = require('express');
 const _ = require('lodash');
 const bcrypt = require('bcrypt');
+const jwt =  require('jsonwebtoken');
 const router = express.Router();
 const { User, validate } = require('../models/user');
 
@@ -21,14 +23,15 @@ router.post('/', async (request, response) => {
     user = new User({ ...request.body });
 
     const salt = await bcrypt.genSalt(10);
-    user.password = await bcrypt.hash(user.password, salt)
+    user.password = await bcrypt.hash(user.password, salt);
 
     await user.save();
 
+    const token = user.generateAuthToken();
     // Using lodash pick() method to select only keys of an object
-    response.status(201).send(_.pick(user, ['name', 'email']));
+    response.status(201).header('x-auth-token', token).send(_.pick(user, ['name', 'email']));
   } catch (exception) {
-    response.status(500).send(`Sorry, an error occured while registering new genre: ${exception.message}`)
+    response.status(500).send(`Sorry, an error occured while registering new genre: ${exception.message}`);
   }
 });
 
