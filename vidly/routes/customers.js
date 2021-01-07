@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { Customer, validate } = require('../models/customer');
+const authorize = require('../middleware/authorization');
 
 // Defining a route to handle http GET request to get all customers
 router.get('/', async (request, response) => {
@@ -33,7 +34,7 @@ router.get('/:id', async (request, response) => {
 });
 
 // Defining a route to handle http POST request to add a new customer
-router.post('/', async (request, response) => {
+router.post('/', authorize, async (request, response) => {
   const { error } = validate(request.body);
 
   if (error) {
@@ -52,7 +53,7 @@ router.post('/', async (request, response) => {
 });
 
 // Defining a route to handle http PUT request to update a customer
-router.put('/:id', async (request, response) => {
+router.put('/:id', authorize, async (request, response) => {
   const { error } = validate(request.body);
 
   if (error) {
@@ -73,7 +74,7 @@ router.put('/:id', async (request, response) => {
 });
 
 // Defining a route to handle http DELETE request to delete a customer
-router.delete('/:id', async (request, response) => {
+router.delete('/:id', authorize, async (request, response) => {
   try {
     const deletedCustomer = await Customer.findByIdAndDelete(request.params.id);
 

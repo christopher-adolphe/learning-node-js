@@ -1,6 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const { Genre, validate } = require('../models/genre');
+const authorize = require('../middleware/authorization');
+const authorizeAdmin = require('../middleware/admin');
 
 // Defining a route to handle http GET request to get all genres
 router.get('/', async (request, response) => {
@@ -31,7 +33,7 @@ router.get('/:id', async (request, response) => {
 });
 
 // Defining a route to handle http POST request to add a new genre
-router.post('/', async (request, response) => {
+router.post('/', authorize, async (request, response) => {
   const { error } = validate(request.body);
 
   if (error) {
@@ -50,7 +52,7 @@ router.post('/', async (request, response) => {
 });
 
 // Defining a route to handle http PUT request to update a genre
-router.put('/:id', async (request, response) => {
+router.put('/:id', authorize, async (request, response) => {
   const { error } = validate(request.body);
 
   if (error) {
@@ -71,7 +73,7 @@ router.put('/:id', async (request, response) => {
 });
 
 // Defining a route to handle http DELETE request to delete a genre
-router.delete('/:id', async (request, response) => {
+router.delete('/:id', [authorize, authorizeAdmin], async (request, response) => {
   try {
     const deletedGenre = await Genre.findByIdAndRemove(request.params.id);
 

@@ -5,6 +5,17 @@ const bcrypt = require('bcrypt');
 const jwt =  require('jsonwebtoken');
 const router = express.Router();
 const { User, validate } = require('../models/user');
+const authorize = require('../middleware/authorization');
+
+router.get('/me', authorize, async (request, response) => {
+  try {
+    const user = await User.findById(request.user._id).select('-password');
+    
+    response.status(200).send(user);
+  } catch (exception) {
+    response.status(500).send(`Sorry, an error occured: ${exception.message}`);
+  }
+});
 
 router.post('/', async (request, response) => {
   const { error } = validate(request.body);
