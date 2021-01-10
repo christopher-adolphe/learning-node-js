@@ -3,88 +3,83 @@ const router = express.Router();
 const { Genre, validate } = require('../models/genre');
 const authorize = require('../middleware/authorization');
 const authorizeAdmin = require('../middleware/admin');
+const asyncMiddleware = require('../middleware/async');
 
 // Defining a route to handle http GET request to get all genres
-router.get('/', async (request, response) => {
-  try {
-    const genreList = await Genre.find()
-      .sort('name')
-      .select('_id name');
+// router.get('/', async (request, response, next) => {
+//   try {
+//     const genreList = await Genre.find()
+//       .sort('name')
+//       .select('_id name');
 
-    response.send(genreList);
-  } catch (exception) {
-    response.status(500).send(`Sorry, an error occured while fetching genres: ${exception.message}`);
-  }
-});
+//     response.send(genreList);
+//   } catch (exception) {
+//     // response.status(500).send(`Sorry, an error occured while fetching genres: ${exception.message}`);
+
+//     // Using the next() method to pass control to the error middleware function
+//     next(exception);
+//   }
+// });
+router.get('/', asyncMiddleware(async (request, response) => {
+  const genreList = await Genre.find()
+    .sort('name')
+    .select('_id name');
+
+  response.send(genreList);
+}));
 
 // Defining a route to handle http GET request to get a specific genre
-router.get('/:id', async (request, response) => {
-  try {
-    const selectedGenre = await Genre.findById(request.params.id);
+router.get('/:id', asyncMiddleware(async (request, response) => {
+  const selectedGenre = await Genre.findById(request.params.id);
 
-    if (!selectedGenre) {
-      return response.status(404).send(`Sorry, we could not find genre with id ${request.params.id}.`);
-    }
-
-    response.send(selectedGenre);
-  } catch (exception) {
-    response.status(500).send(`Sorry, an error occured while fetching genre with id ${request.params.id}: ${exception.message}`);
+  if (!selectedGenre) {
+    return response.status(404).send(`Sorry, we could not find genre with id ${request.params.id}.`);
   }
-});
+
+  response.send(selectedGenre);
+}));
 
 // Defining a route to handle http POST request to add a new genre
-router.post('/', authorize, async (request, response) => {
+router.post('/', authorize, asyncMiddleware(async (request, response) => {
   const { error } = validate(request.body);
 
   if (error) {
     return response.status(400).send(`Sorry, we could not create new genre because ${error.message}.`);
   }
 
-  try {
-    const newGenre = new Genre({ name: request.body.name });
+  const newGenre = new Genre({ name: request.body.name });
 
-    await newGenre.save();
-    
-    response.status(201).send(newGenre);
-  } catch (exception) {
-    response.status(500).send(`Sorry, an error occured while creating new genre: ${exception.message}`);
-  }
-});
+  await newGenre.save();
+  
+  response.status(201).send(newGenre);
+}));
 
 // Defining a route to handle http PUT request to update a genre
-router.put('/:id', authorize, async (request, response) => {
+router.put('/:id', authorize, asyncMiddleware(async (request, response) => {
   const { error } = validate(request.body);
 
   if (error) {
     return response.sendStatus(400).send(`Sorry, we could not update genre with id ${request.params.id} because ${error.message}.`);
   }
   
-  try {
-    const genre = await Genre.findByIdAndUpdate(request.params.id, { name: request.body.name }, { new: true });
+  const genre = await Genre.findByIdAndUpdate(request.params.id, { name: request.body.name }, { new: true });
     
-    if (!genre) {
-      return response.status(404).send(`Sorry, we could not find genre with id ${request.params.id} to perform update.`);
-    }
-
-    response.send(genre);
-  } catch (exception) {
-    response.status(500).send(`Sorry, an error occured while updating genre with id ${request.params.id}: ${exception.message}`);
+  if (!genre) {
+    return response.status(404).send(`Sorry, we could not find genre with id ${request.params.id} to perform update.`);
   }
-});
+
+  response.send(genre);
+}));
 
 // Defining a route to handle http DELETE request to delete a genre
-router.delete('/:id', [authorize, authorizeAdmin], async (request, response) => {
-  try {
-    const deletedGenre = await Genre.findByIdAndRemove(request.params.id);
+router.delete('/:id', [authorize, authorizeAdmin], asyncMiddleware(async (request, response) => {
+  const deletedGenre = await Genre.findByIdAndRemove(request.params.id);
 
-    if (!deletedGenre) {
-      return response.status(404).send(`Sorry, we could not find genre with id ${request.params.id} to perform delete.`);
-    }
-
-    response.send(deletedGenre);
-  } catch (exception) {
-    response.status(500).send(`Sorry, an error occured while deleting genre with id ${request.params.id}: ${exception.message}`);
+  if (!deletedGenre) {
+    return response.status(404).send(`Sorry, we could not find genre with id ${request.params.id} to perform delete.`);
   }
-});
+
+  response.send(deletedGenre);
+}));
 
 module.exports = router;
