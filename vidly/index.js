@@ -1,5 +1,11 @@
 // Loading Config module
 const config = require('config');
+// Loading Express Async Errors module
+require('express-async-errors');
+// Loading Winston module
+const winston = require('winston');
+// Loading Winston-mongodb module
+require('winston-mongodb');
 // Loading Express module
 const express = require('express');
 // Loading Mongoose module
@@ -24,6 +30,32 @@ const errorHanlder = require('./middleware/error');
 
 // Creating an Express application
 const app = express();
+
+// Handling and logging uncaughtException
+process.on('uncaughtException', (exception) => {
+  console.log('An uncaught exception occured');
+  winston.error(exception.message, exception);
+
+  process.exit(1);
+});
+
+// Handling and logging unhandleRejection
+process.on('unhandledRejection', (exception) => {
+  console.log('An unhandled rejection occured');
+  throw exception;
+});
+
+// Creating a Winston transport to log errors to a file
+// Creating a Winston transport to log errors to the database
+const logger = winston.createLogger({
+  transports: [
+    new winston.transports.File({ filename: 'errors.log', level: 'error', format: winston.format.json() }),
+    new winston.transports.MongoDB({ db: 'mongodb://127.0.0.1:27017/vidly' })
+  ],
+  exceptionHandlers: [
+    new winston.transports.File({ filename: 'exceptions.log' })
+  ]
+});
 
 // Checking if JWT private key is defined and exiting the process
 if (!config.get('jwtPrivateKey')) {

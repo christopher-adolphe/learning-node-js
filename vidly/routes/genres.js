@@ -3,33 +3,17 @@ const router = express.Router();
 const { Genre, validate } = require('../models/genre');
 const authorize = require('../middleware/authorization');
 const authorizeAdmin = require('../middleware/admin');
-const asyncMiddleware = require('../middleware/async');
 
-// Defining a route to handle http GET request to get all genres
-// router.get('/', async (request, response, next) => {
-//   try {
-//     const genreList = await Genre.find()
-//       .sort('name')
-//       .select('_id name');
-
-//     response.send(genreList);
-//   } catch (exception) {
-//     // response.status(500).send(`Sorry, an error occured while fetching genres: ${exception.message}`);
-
-//     // Using the next() method to pass control to the error middleware function
-//     next(exception);
-//   }
-// });
-router.get('/', asyncMiddleware(async (request, response) => {
+router.get('/', async (request, response) => {
   const genreList = await Genre.find()
     .sort('name')
     .select('_id name');
 
   response.send(genreList);
-}));
+});
 
 // Defining a route to handle http GET request to get a specific genre
-router.get('/:id', asyncMiddleware(async (request, response) => {
+router.get('/:id', async (request, response) => {
   const selectedGenre = await Genre.findById(request.params.id);
 
   if (!selectedGenre) {
@@ -37,10 +21,10 @@ router.get('/:id', asyncMiddleware(async (request, response) => {
   }
 
   response.send(selectedGenre);
-}));
+});
 
 // Defining a route to handle http POST request to add a new genre
-router.post('/', authorize, asyncMiddleware(async (request, response) => {
+router.post('/', authorize, async (request, response) => {
   const { error } = validate(request.body);
 
   if (error) {
@@ -52,10 +36,10 @@ router.post('/', authorize, asyncMiddleware(async (request, response) => {
   await newGenre.save();
   
   response.status(201).send(newGenre);
-}));
+});
 
 // Defining a route to handle http PUT request to update a genre
-router.put('/:id', authorize, asyncMiddleware(async (request, response) => {
+router.put('/:id', authorize, async (request, response) => {
   const { error } = validate(request.body);
 
   if (error) {
@@ -69,10 +53,10 @@ router.put('/:id', authorize, asyncMiddleware(async (request, response) => {
   }
 
   response.send(genre);
-}));
+});
 
 // Defining a route to handle http DELETE request to delete a genre
-router.delete('/:id', [authorize, authorizeAdmin], asyncMiddleware(async (request, response) => {
+router.delete('/:id', [authorize, authorizeAdmin], async (request, response) => {
   const deletedGenre = await Genre.findByIdAndRemove(request.params.id);
 
   if (!deletedGenre) {
@@ -80,6 +64,6 @@ router.delete('/:id', [authorize, authorizeAdmin], asyncMiddleware(async (reques
   }
 
   response.send(deletedGenre);
-}));
+});
 
 module.exports = router;
