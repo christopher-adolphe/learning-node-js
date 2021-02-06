@@ -1,4 +1,6 @@
 const lib = require('../lib');
+const db = require('../db');
+const mail = require('../mail');
 
 // Using #describe to group related unit tests
 describe('#absolute', () => {
@@ -156,5 +158,70 @@ describe('#fizzBuzz', () => {
 
       expect(result).toBe(param);
     }
+  });
+});
+
+describe('#applyDiscount', () => {
+  it('should apply a 10% discount given the customer has more than 10 points', () => {
+    // Creating a mock function for getCustomerSync
+    db.getCustomerSync = (customerId) => {
+      console.log('Mocked getCustomerSync');
+      return { id: customerId, points: 20 };
+    };
+
+    const order = { customerId: 1, totalPrice: 100 };
+    
+    lib.applyDiscount(order);
+
+    expect(order.totalPrice).toBe(90);
+  });
+});
+
+describe('#notifyCustomer', () => {
+  it('should send a mail to the customer', () => {
+    db.getCustomerSync = (customerId) => {
+      return { id: customerId, email: 'customer@somemail.com' };
+    };
+
+    let mailSent = false;
+
+    mail.send = (to, subject) => {
+      console.log('Mocked send mail');
+      mailSent = !mailSent;
+    };
+
+    const order = { customerId: 1, totalPrice: 100 };
+
+    lib.notifyCustomer(order);
+
+    expect(mailSent).toBe(true);
+  });
+});
+
+describe('#notifyCustomer using Jest mock function', () => {
+  it('should send a mail to the customer', () => {
+    // Using Jest mock function
+    // const mockFunction = jest.fn();
+
+    // Returning a value from the jest mock function
+    // mockFunction.mockReturnValue(1);
+
+    // Returning a promise from the jest mock function
+    // mockFunction.mockResolvedValue(1);
+
+    // Returning an error from the jest mock function
+    // mockFunction.mockRejectedValue(new Error('Something went wrong!'));
+    // const result = await mockFunction();
+
+    const order = { customerId: 1, totalPrice: 100 };
+
+    db.getCustomerSync = jest.fn().mockReturnValue({ id: order.customerId, email: 'customer@somemail.com' });
+    mail.send = jest.fn();
+
+    lib.notifyCustomer(order);
+
+    expect(mail.send).toHaveBeenCalled();
+    expect(mail.send.mock.calls[0][0]).toBe('customer@somemail.com');
+    expect(mail.send.mock.calls[0][1]).toMatch(/order/);
   });
 });
