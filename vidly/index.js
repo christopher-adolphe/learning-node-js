@@ -19,6 +19,8 @@ require('./startup/db')();
 // Defining a port number for the Express application
 const port = process.env.PORT || 3000;
 
-app.listen(port, () => {
+const server = app.listen(port, () => {
   winston.info(`Server is up and running on ${port}... Click here http://localhost:${port}`);
 });
+
+module.exports = server;
