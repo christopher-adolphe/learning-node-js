@@ -73,4 +73,4 @@ router.post('/', authorize, async (request, response) => {
   }
 });
 
-module.exports =  router;
+module.exports = router;

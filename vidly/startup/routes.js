@@ -11,6 +11,8 @@ const rentalsRouter = require('../routes/rentals');
 const usersRouter = require('../routes/users');
 // Loading the Authentication module
 const AuthenticationRouter = require('../routes/authentication');
+// Loading the Returns module
+const returnsRouter = require('../routes/returns');
 // Loading the ErrorHandler module
 const errorHanlder = require('../middleware/error');
 
@@ -24,6 +26,7 @@ module.exports = (app) => {
   app.use('/api/movies', moviesRouter);
   app.use('/api/rentals', rentalsRouter);
   app.use('/api/users', usersRouter);
+  app.use('/api/returns', returnsRouter);
   app.use('/api/auth', AuthenticationRouter);
 
   // Adding an error middleware function

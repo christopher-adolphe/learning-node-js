@@ -4,9 +4,9 @@ const request = require('supertest');
 const { Genre } = require('../../../models/genre');
 const { User } = require('../../../models/user');
 
-let server;
-
 describe('/api/genres', () => {
+  let server;
+
   // Using beforeEach() to open a connection to the test database
   beforeEach(() => {
     // Loading the Server Module
@@ -15,11 +15,10 @@ describe('/api/genres', () => {
 
   // Using afterEach() to close the connection to the test database after each test case
   afterEach( async () => {
+    // Closing the connection to the test database
+    await server.close();
     // Removing test data from the database after running the test
     await Genre.remove({});
-
-    // Closing the connection to the test database
-    server.close();
   });
 
   describe('GET /', () => {
