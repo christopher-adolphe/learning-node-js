@@ -4,7 +4,7 @@
   "description": "Demo application build with Node.js, Express and MongoDB",
   "main": "index.js",
   "scripts": {
-    "test": "jest --watchAll --verbose"
+    "test": "jest --watchAll --verbose --coverage"
   },
   "author": "Christopher Adolphe",
   "license": "ISC",
