@@ -15,6 +15,8 @@ require('./startup/logging')();
 require('./startup/routes')(app);
 // Loading the Database module
 require('./startup/db')();
+// Loading the Prod module
+require('./startup/prod')(app);
 
 // Defining a port number for the Express application
 const port = process.env.PORT || 3000;
