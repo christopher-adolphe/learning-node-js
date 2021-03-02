@@ -14,11 +14,11 @@ describe('/api/genres', () => {
   });
 
   // Using afterEach() to close the connection to the test database after each test case
-  afterEach( async () => {
-    // Closing the connection to the test database
-    await server.close();
+  afterEach(async () => {
     // Removing test data from the database after running the test
     await Genre.remove({});
+    // Closing the connection to the test database
+    await server.close();
   });
 
   describe('GET /', () => {

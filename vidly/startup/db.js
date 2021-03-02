@@ -13,5 +13,7 @@ module.exports = () => {
       useUnifiedTopology: true,
       useFindAndModify: false,
       useCreateIndex: true
-    }).then(() => winston.info(`Connected to ${db}`))
+    }).then(() => {
+      winston.info(`Connected to ${db}`);
+    });
 }
