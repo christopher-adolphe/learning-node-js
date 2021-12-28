@@ -2,6 +2,10 @@ const config = require('config');
 const jwt = require('jsonwebtoken');
 
 const authorize = (request, response, next) => {
+  if (!config.get('requiresAuth')) {
+    return next();
+  }
+  
   const token = request.header('x-auth-token');
 
   if (!token) {
