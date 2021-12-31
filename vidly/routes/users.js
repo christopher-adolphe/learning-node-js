@@ -40,7 +40,10 @@ router.post('/', async (request, response) => {
 
     const token = user.generateAuthToken();
     // Using lodash pick() method to select only keys of an object
-    response.status(201).header('x-auth-token', token).send(_.pick(user, ['name', 'email']));
+    response.status(201)
+    .header('x-auth-token', token)
+    .header('access-control-expose-headers', 'x-auth-token')
+    .send(_.pick(user, ['name', 'email']));
   } catch (exception) {
     response.status(500).send(`Sorry, an error occured while registering new genre: ${exception.message}`);
   }
