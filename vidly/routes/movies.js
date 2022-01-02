@@ -3,6 +3,7 @@ const router = express.Router();
 const { Movie, validate } = require('../models/movie');
 const { Genre } = require('../models/genre');
 const authorize = require('../middleware/authorization');
+const authorizeAdmin = require('../middleware/admin')
 
 // Defining a route to handle http GET request to get all movies
 router.get('/', async (resquest, response) => {
@@ -84,7 +85,7 @@ router.put('/:id', authorize, async (request, response) => {
 });
 
 // Defining a route to handle http DELETE request to delete a movie
-router.delete('/:id', authorize, async (request, response) => {
+router.delete('/:id', [authorize, authorizeAdmin], async (request, response) => {
   try {
     const deletedMovie = await Movie.findByIdAndDelete(request.params.id);
 
